@@ -3,12 +3,15 @@ import {SafeAreaView, FlatList, StyleSheet, Text, View, RefreshControl, Activity
 import { SearchBar, Button } from 'react-native-elements';
 import DatePicker from 'react-native-date-picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import AddModal from './AddModal';
+import Utils from './Utils';
 
 export default function App() {
   const [refreshing, setRefreshing] = useState(true);
   const [listData, setListData] = useState([]);
   const [date, setDate] = useState(new Date());
   const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [addModalVisible, setAddModalVisible] = useState(false);
 
   const loadList = () => {
     const DATA = [
@@ -51,7 +54,7 @@ export default function App() {
     //     });
   };
 
-  const changeDate = (dayOffset) => {
+  const changeDate = (dayOffset:number) => {
     const newDate = new Date(date);
     newDate.setDate(date.getDate() + dayOffset);
     setDate(newDate);
@@ -97,24 +100,28 @@ export default function App() {
           <Button
               icon={{
                 name: "add-circle",
-                size: 18,
+                size: 36,
                 color: "orange"}}
               type='clear'
-              title='Add'
               titleStyle={{color: 'orange'}}
+              onPress={()=>setAddModalVisible(true)}
           />
         </View>
+        <AddModal
+            visible={addModalVisible}
+            onCancel={()=>setAddModalVisible(false)}
+            onOK={()=>setAddModalVisible(false)}
+        />
       </SafeAreaView>
   );
 }
 
 const ListItemView = ({item, index}) => {
   const date = new Date(item.time * 1000);
-  const dateText = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() + ' ' + date.getHours() + ':' + date.getMinutes();
   return (
       <View style={styles.listItem}>
         <Text style={styles.listText}>{item.text}</Text>
-        <Text style={styles.listTime}>{dateText}</Text>
+        <Text style={styles.listTime}>{Utils.simpleDateTime(date)}</Text>
       </View>
   );
 }
@@ -166,6 +173,7 @@ const styles = StyleSheet.create({
     color: '#555',
   },
   listTime: {
+    marginTop: 3,
     fontSize: 15,
     color: '#aaa',
   },
@@ -177,7 +185,7 @@ const styles = StyleSheet.create({
   },
   addButton: {
     position: 'absolute',
-    bottom: 50,
-    right: 30,
+    bottom: 60,
+    right: 25,
   },
 });
