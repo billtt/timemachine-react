@@ -19,6 +19,8 @@ export default function App() {
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [loginModalVisible, setLoginModalVisible] = useState(false);
+  const [searchText, setSearchText] = useState('');
+  const [searchMode, setSearchMode] = useState(false);
 
   const changeDate = (dayOffset:number) => {
     const newDate = new Date(date);
@@ -57,6 +59,7 @@ export default function App() {
       if (json) {
         console.log('List error: ' + json.code);
       }
+      setRefreshing(false);
     } else {
       setListData(json.slices);
       setRefreshing(false);
@@ -65,6 +68,9 @@ export default function App() {
 
   const addSlice = async(content:string, addDate:Date) => {
     setAddModalVisible(false);
+      if (_global.token === '') {
+          return;
+      }
     let json = await Utils.fetchJson('/api/add', _global.token, {content: content, date: addDate.toISOString()});
     if (!json || json.code !== 0) {
       if (json) {
@@ -76,6 +82,47 @@ export default function App() {
       } else {
         setDate(addDate);
       }
+    }
+  };
+
+  const search = async() => {
+    if (_global.token === '') {
+        return;
+    }
+    if (searchText.trim() === '') {
+        if (searchMode) {
+            setSearchMode(false);
+            loadList();
+        }
+        return;
+    }
+    setListData([]);
+    setRefreshing(true);
+    setSearchMode(true);
+    let json = await Utils.fetchJson('/api/search', _global.token, {search: searchText});
+    if (!json || json.code !== 0) {
+      if (json) {
+        console.log('Search error: ' + json.code);
+      }
+      setRefreshing(false);
+    } else {
+      setListData(json.slices);
+      setRefreshing(false);
+    }
+  };
+
+  const clearSearch = () => {
+      if (searchMode) {
+            setSearchMode(false);
+            loadList();
+      }
+  };
+
+  const refresh = () => {
+    if (searchMode) {
+        search();
+    } else {
+        loadList();
     }
   };
 
@@ -106,7 +153,7 @@ export default function App() {
       <SafeAreaView style={styles.container}>
         <Text style={styles.titleView}>Time Machine</Text>
         <View style={styles.searchView}>
-          <SearchBar placeholder='Search' platform='ios'/>
+          <SearchBar placeholder='Search' value={searchText} onChangeText={(text)=>{setSearchText(text)}} onSubmitEditing={search} onClear={clearSearch} platform='ios'/>
         </View>
         <View style={styles.dateView}>
           <Button type='clear' icon={{name: 'arrow-back-ios', size: 16, color: 'gray'}} onPress={()=>changeDate(-1)}></Button>
@@ -121,7 +168,7 @@ export default function App() {
             ItemSeparatorComponent={ListSeparatorView}
             ListEmptyComponent={ListEmptyView}
             refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={loadList} />
+              <RefreshControl refreshing={refreshing} onRefresh={refresh} />
             }
         />
         <DatePicker
@@ -160,7 +207,7 @@ const ListEmptyView = () => {
     return (
         //View to show when list is empty
         <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No slices for this date.</Text>
+            <Text style={styles.emptyText}>No slices found.</Text>
         </View>
     );
 };
