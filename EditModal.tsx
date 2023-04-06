@@ -5,21 +5,21 @@ import {Button} from 'react-native-elements';
 import DatePicker from 'react-native-date-picker';
 import Utils from './Utils';
 
-type AddModalProps = {
+type EditModalProps = {
     visible: boolean,
     editingItem: any,
     onCancel: () => void,
     onOK: (editingItem:any, content:string, date:Date) => void,
 };
 
-class AddModal extends Component<AddModalProps> {
+class EditModal extends Component<EditModalProps> {
     state = {
         date: new Date(),
         content: '',
         datePickerOpen: false,
     };
 
-    componentDidUpdate(prevProps: Readonly<AddModalProps>, prevState: Readonly<{}>, snapshot?: any) {
+    componentDidUpdate(prevProps: Readonly<EditModalProps>, prevState: Readonly<{}>, snapshot?: any) {
         if (this.props.visible && prevProps.visible !== this.props.visible) {
             if (this.props.editingItem) {
                 this.setState({
@@ -96,4 +96,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default AddModal;
+export default EditModal;

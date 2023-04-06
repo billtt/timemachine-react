@@ -8,7 +8,7 @@ import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import {RectButton} from 'react-native-gesture-handler';
 import ListSwipe from './ListSwipe';
-import AddModal from './AddModal';
+import EditModal from './EditModal';
 import LoginModal from './LoginModal';
 import Utils from './Utils';
 
@@ -21,7 +21,7 @@ export default function App() {
   const [listData, setListData] = useState([]);
   const [date, setDate] = useState(new Date());
   const [datePickerOpen, setDatePickerOpen] = useState(false);
-  const [addModalVisible, setAddModalVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
   const [loginModalVisible, setLoginModalVisible] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [searchMode, setSearchMode] = useState(false);
@@ -205,16 +205,16 @@ export default function App() {
 
   const showEditAsAdd = () => {
       setEditingItem(null);
-      setAddModalVisible(true);
+      setEditModalVisible(true);
   }
 
   const showEditAsUpdate = (item:Object) => {
         setEditingItem(item);
-        setAddModalVisible(true);
+        setEditModalVisible(true);
   }
 
   const onEditOK = (editingItem:any, content:string, addDate:Date) => {
-      setAddModalVisible(false);
+      setEditModalVisible(false);
         if (editingItem) {
             update(editingItem.id, content, addDate);
         } else {
@@ -316,10 +316,10 @@ export default function App() {
                   onPress={showEditAsAdd}
               />
           </View>
-          <AddModal
-              visible={addModalVisible}
+          <EditModal
+              visible={editModalVisible}
               editingItem={editingItem}
-              onCancel={()=>setAddModalVisible(false)}
+              onCancel={()=>setEditModalVisible(false)}
               onOK={onEditOK}
           />
           <LoginModal
