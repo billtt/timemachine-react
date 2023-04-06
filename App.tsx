@@ -7,6 +7,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import {RectButton} from 'react-native-gesture-handler';
+import ReadMore from 'react-native-read-more-text';
 import ListSwipe from './ListSwipe';
 import EditModal from './EditModal';
 import LoginModal from './LoginModal';
@@ -244,7 +245,9 @@ export default function App() {
         return (
             <ListSwipe onActionPress={(action)=>onListItemAction(item, action)}>
                 <View style={styles.listItem}>
-                    <Text style={styles.listText}>{item.content}</Text>
+                    <ReadMore numberOfLines={1}>
+                        <Text style={styles.listText}>{item.content}</Text>
+                    </ReadMore>
                     <Text style={styles.listTime}>{Utils.simpleDateTime(date)}</Text>
                 </View>
             </ListSwipe>
