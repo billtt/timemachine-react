@@ -235,7 +235,9 @@ export default function App() {
         return (
             //View to show when list is empty
             <View style={styles.emptyContainer}>
-                <Text style={styles.emptyText}>No slices found.</Text>
+                <Text style={styles.emptyText}>
+                    {refreshing ? 'Loading...' :  'No slices found.'}
+                </Text>
             </View>
         );
     };
@@ -289,7 +291,6 @@ export default function App() {
               <Button type='clear' title={date.toDateString()} onPress={()=>setDatePickerOpen(true)} titleStyle={{fontSize: 16, color: 'gray'}}></Button>
               <Button type='clear' icon={{name: 'arrow-forward-ios', size: 16, color: 'gray'}} onPress={()=>changeDate(1)}></Button>
           </View>
-          {refreshing ? <ActivityIndicator /> : null}
           <FlatList
               style={styles.listView}
               data={listData}
