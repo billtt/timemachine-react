@@ -54,6 +54,28 @@ export default function App() {
     }
   };
 
+  const logout = async () => {
+      try {
+          await AsyncStorage.removeItem('TOKEN');
+          _global.token = null;
+          if (searchMode) {
+              setSearchMode(false);
+              setSearchText('');
+          }
+          setListData([]);
+      } catch (error) {
+          console.log(error);
+      }
+      setLoginModalVisible(true);
+  };
+
+  const onLogoutPress = () => {
+      Alert.alert('Sure to logout?', '', [
+          { text: 'Cancel', style: 'cancel', },
+          { text: 'OK', onPress: logout},
+      ]);
+  };
+
   const loadList = async()=> {
     if (_global.token === '') {
         return;
@@ -207,12 +229,12 @@ export default function App() {
   const showEditAsAdd = () => {
       setEditingItem(null);
       setEditModalVisible(true);
-  }
+  };
 
   const showEditAsUpdate = (item:Object) => {
         setEditingItem(item);
         setEditModalVisible(true);
-  }
+  };
 
   const onEditOK = (editingItem:any, content:string, addDate:Date) => {
       setEditModalVisible(false);
@@ -221,7 +243,7 @@ export default function App() {
         } else {
             addSlice(content, addDate);
         }
-  }
+  };
 
   useEffect(() => {
     init();
@@ -282,7 +304,10 @@ export default function App() {
 
   return (
       <SafeAreaView style={styles.container}>
-          <Text style={styles.titleView}>Time Machine</Text>
+          <View style={styles.titleView}>
+              <Text style={styles.titleText}>Time Machine</Text>
+              <Button style={styles.logoutButton} icon={{name: "logout", size: 24, color: "gray"}} type='clear' onPress={onLogoutPress}/>
+          </View>
           <View style={styles.searchView}>
               <SearchBar placeholder='Search' value={searchText} onChangeText={(text)=>{setSearchText(text)}} onSubmitEditing={search} onClear={clearSearch} platform='ios'/>
           </View>
@@ -347,10 +372,21 @@ const styles = StyleSheet.create({
   },
   titleView: {
     width: '100%',
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
+      flexDirection: 'row',
+        justifyContent: 'space-between',
   },
+    titleText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        alignSelf: 'center',
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        paddingLeft: 60,
+    },
+    logoutButton: {
+      alignSelf: 'flex-end',
+        width: 60
+    },
   searchView: {
     width: '100%',
   },
