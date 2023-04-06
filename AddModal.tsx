@@ -14,6 +14,7 @@ type AddModalProps = {
 class AddModal extends Component<AddModalProps> {
     state = {
         date: new Date(),
+        content: '',
         datePickerOpen: false,
     };
 
@@ -24,7 +25,7 @@ class AddModal extends Component<AddModalProps> {
     }
 
     render() {
-        const {date, datePickerOpen} = this.state;
+        const {content, date, datePickerOpen} = this.state;
         return (
             <View>
                 <Modal
@@ -36,10 +37,10 @@ class AddModal extends Component<AddModalProps> {
                     }}>
                     <View style={styles.centeredView}>
                         <View style={styles.modalView}>
-                            <TextInput placeholder="What's up?" style={styles.input}/>
+                            <TextInput multiline placeholder="What's up?" onChangeText={text => this.setState({content:text})} style={styles.input}/>
                             <Button type='clear' title={Utils.simpleDateTime(date)} onPress={()=>this.setState({datePickerOpen: true})}/>
                             <View style={{flexDirection: 'row', justifyContent: 'space-between', width: '50%', marginTop: 20}}>
-                                <Button title='OK' type='clear' onPress={()=>this.props.onOK(date)}/>
+                                <Button title='OK' type='clear' onPress={()=>this.props.onOK(content, date)}/>
                                 <Button title='Cancel' type='clear' onPress={this.props.onCancel}/>
                             </View>
                         </View>
@@ -79,7 +80,7 @@ const styles = StyleSheet.create({
         margin: 20,
         borderBottomWidth: 1,
         borderBottomColor: 'gray',
-        fontSize: 18,
+        fontSize: 16,
     },
 });
 

@@ -1,71 +1,106 @@
 import {useEffect, useState} from "react";
 import {SafeAreaView, FlatList, StyleSheet, Text, View, RefreshControl, ActivityIndicator} from 'react-native';
 import { SearchBar, Button } from 'react-native-elements';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import DatePicker from 'react-native-date-picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import AddModal from './AddModal';
+import LoginModal from './LoginModal';
 import Utils from './Utils';
 
+const _global = {
+  token: '',
+};
+
 export default function App() {
-  const [refreshing, setRefreshing] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [listData, setListData] = useState([]);
   const [date, setDate] = useState(new Date());
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [addModalVisible, setAddModalVisible] = useState(false);
-
-  const loadList = () => {
-    const DATA = [
-      {text: 'Hello, world! 你好呀😄', time: 1680437460},
-      {text: 'Hello, world! 你好呀😄', time: 1680437460},
-      {text: 'Hello, world! 你好呀😄', time: 1680437460},
-      {text: 'Hello, world!', time: 1680437460},
-      {text: 'Hello, world!', time: 1680437460},
-      {text: 'Hello, world!', time: 1680437460},
-      {text: 'Hello, world! 你好呀😄', time: 1680437460},
-      {text: 'Hello, world!', time: 1680437460},
-      {text: 'Hello, world!', time: 1680437460},
-      {text: 'Hello, world!', time: 1680437460},
-      {text: 'Hello, world!', time: 1680437460},
-      {text: 'Hello, world!', time: 1680437460},
-      {text: 'Hello, world!', time: 1680437460},
-      {text: 'Hello, world! Super long! Super long! Super long! Super long! Super long! Super long! Super long! Super long!', time: 1680437460},
-      {text: 'Hello, world!', time: 1680437460},
-      {text: 'Hello, world!', time: 1680437460},
-      {text: 'Hello, world!', time: 1680437460},
-      {text: 'Hello, world!', time: 1680437460},
-      {text: 'Hello, world!', time: 1680437460},
-      {text: 'Hello, world!', time: 1680437460},
-      {text: 'Hello, world!', time: 1680437460},
-      {text: 'Hello, world!', time: 1680437460},
-    ];
-    setTimeout(() => {
-      setListData(DATA);
-      setRefreshing(false);
-    }, 1000);
-    // fetch('https://randomuser.me/api/?results=8')
-    //     .then((response) => response.json())
-    //     .then((responseJson) => {
-    //       setRefreshing(false);
-    //       var newdata = userData.concat(responseJson.results);
-    //       setUserData(newdata);
-    //     })
-    //     .catch((error) => {
-    //       console.error(error);
-    //     });
-  };
+  const [loginModalVisible, setLoginModalVisible] = useState(false);
 
   const changeDate = (dayOffset:number) => {
     const newDate = new Date(date);
     newDate.setDate(date.getDate() + dayOffset);
     setDate(newDate);
+  };
+
+  const login = async (username:string, password:string) => {
+    setLoginModalVisible(false);
+    let json = await Utils.fetchJson('/api/login', null, {username: username, password: password});
+    if (!json || json.code !== 0) {
+      if (json) {
+        console.log('Login error: ' + json.code);
+      }
+      setLoginModalVisible(true);
+    } else {
+        try {
+            await AsyncStorage.setItem('TOKEN', json.token);
+            _global.token = json.token;
+            loadList();
+        } catch (error) {
+          console.log(error);
+            setLoginModalVisible(true);
+        }
+    }
+  };
+
+  const loadList = async()=> {
+    if (_global.token === '') {
+        return;
+    }
     setListData([]);
     setRefreshing(true);
-    loadList();
+    let json = await Utils.fetchJson('/api/list', _global.token, {date: date.toDateString()});
+    if (!json || json.code !== 0) {
+      if (json) {
+        console.log('List error: ' + json.code);
+      }
+    } else {
+      setListData(json.slices);
+      setRefreshing(false);
+    }
+  };
+
+  const addSlice = async(content:string, addDate:Date) => {
+    setAddModalVisible(false);
+    let json = await Utils.fetchJson('/api/add', _global.token, {content: content, date: addDate.toISOString()});
+    if (!json || json.code !== 0) {
+      if (json) {
+        console.log('Add error: ' + json.code);
+      }
+    } else {
+      if (addDate.toDateString() === date.toDateString()) {
+        loadList();
+      } else {
+        setDate(addDate);
+      }
+    }
   };
 
   useEffect(() => {
-    loadList();
+    init();
   }, []);
+
+  useEffect(()=>{
+    loadList()
+  }, [date]);
+
+  // main routine goes here
+  const init = async () => {
+    try {
+      const token = await AsyncStorage.getItem('TOKEN');
+      if (token == null) {
+        setLoginModalVisible(true);
+      } else {
+        _global.token = token;
+        loadList();
+      }
+    } catch (error) {
+      // Error retrieving data
+    }
+  };
 
   return (
       <SafeAreaView style={styles.container}>
@@ -84,6 +119,7 @@ export default function App() {
             data={listData}
             renderItem={ListItemView}
             ItemSeparatorComponent={ListSeparatorView}
+            ListEmptyComponent={ListEmptyView}
             refreshControl={
               <RefreshControl refreshing={refreshing} onRefresh={loadList} />
             }
@@ -110,21 +146,34 @@ export default function App() {
         <AddModal
             visible={addModalVisible}
             onCancel={()=>setAddModalVisible(false)}
-            onOK={()=>setAddModalVisible(false)}
+            onOK={addSlice}
+        />
+        <LoginModal
+            visible={loginModalVisible}
+            onOK={login}
         />
       </SafeAreaView>
   );
 }
 
+const ListEmptyView = () => {
+    return (
+        //View to show when list is empty
+        <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>No slices for this date.</Text>
+        </View>
+    );
+};
+
 const ListItemView = ({item, index}) => {
-  const date = new Date(item.time * 1000);
+  const date = new Date(item.time);
   return (
       <View style={styles.listItem}>
-        <Text style={styles.listText}>{item.text}</Text>
+        <Text style={styles.listText}>{item.content}</Text>
         <Text style={styles.listTime}>{Utils.simpleDateTime(date)}</Text>
       </View>
   );
-}
+};
 
 const ListSeparatorView = () => {
   return (
@@ -169,13 +218,21 @@ const styles = StyleSheet.create({
   },
   listText: {
     marginTop: 3,
-    fontSize: 18,
+    fontSize: 16,
     color: '#555',
   },
   listTime: {
     marginTop: 3,
-    fontSize: 15,
+    fontSize: 14,
     color: '#aaa',
+  },
+  emptyContainer: {
+      paddingTop: 100,
+      alignItems: 'center',
+  },
+  emptyText: {
+      fontSize: 15,
+      color: 'gray',
   },
   separator: {
     height: 1,
