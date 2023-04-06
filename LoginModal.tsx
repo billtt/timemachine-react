@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {useState} from 'react';
-import {Alert, Modal, StyleSheet, Text, Pressable, View, TextInput} from 'react-native';
+import {Alert, Modal, StyleSheet, Text, Pressable, View, TextInput, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard} from 'react-native';
 import {Button} from 'react-native-elements';
 import DatePicker from 'react-native-date-picker';
 import Utils from './Utils';
@@ -23,14 +23,19 @@ class LoginModal extends Component<LoginModalProps> {
                     transparent={true}
                     visible={this.props.visible}
                     >
-                    <View style={styles.centeredView}>
-                        <View style={styles.modalView}>
-                            <Text style={{fontSize: 24, fontWeight: 'bold'}}>Login</Text>
-                            <TextInput placeholder="Username" style={styles.input} id='username' autoCapitalize='none' onChangeText={newText => this.setState({username: newText})}/>
-                            <TextInput placeholder="Password" style={styles.input} secureTextEntry={true} autoCapitalize='none' onChangeText={newText => this.setState({password: newText})}/>
-                            <Button title='OK' type='clear' onPress={()=>this.props.onOK(this.state.username, this.state.password)}/>
-                        </View>
-                    </View>
+                    <KeyboardAvoidingView style={{flex: 1}} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+                        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                            <View style={styles.centeredView}>
+                                <View style={{flex: 1}}></View>
+                                <View style={styles.modalView}>
+                                    <Text style={{fontSize: 24, fontWeight: 'bold'}}>Login</Text>
+                                    <TextInput placeholder="Username" style={styles.input} id='username' autoCapitalize='none' onChangeText={newText => this.setState({username: newText})}/>
+                                    <TextInput placeholder="Password" style={styles.input} secureTextEntry={true} autoCapitalize='none' onChangeText={newText => this.setState({password: newText})}/>
+                                    <Button title='OK' type='clear' onPress={()=>this.props.onOK(this.state.username, this.state.password)}/>
+                                </View>
+                            </View>
+                        </TouchableWithoutFeedback>
+                    </KeyboardAvoidingView>
                 </Modal>
             </View>
         );
@@ -44,8 +49,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         elevation: 5,
         width: '100%',
-        position: 'absolute',
-        bottom: 0,
+        alignSelf: 'flex-end',
     },
     centeredView: {
         flex: 1,

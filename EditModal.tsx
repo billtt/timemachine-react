@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {useState} from 'react';
-import {Alert, Modal, StyleSheet, Text, Pressable, View, TextInput} from 'react-native';
+import {Alert, Modal, StyleSheet, Text, Pressable, View, TextInput, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard} from 'react-native';
 import {Button} from 'react-native-elements';
 import DatePicker from 'react-native-date-picker';
 import Utils from './Utils';
@@ -46,17 +46,22 @@ class EditModal extends Component<EditModalProps> {
                     onRequestClose={() => {
                         this.setState({visible: false});
                     }}>
-                    <View style={styles.centeredView}>
-                        <View style={styles.modalView}>
-                            <TextInput multiline placeholder="What's up?" onChangeText={text => this.setState({content:text})} value={content} style={styles.input}/>
-                            <Button type='clear' title={Utils.simpleDateTime(date)} onPress={()=>this.setState({datePickerOpen: true})}/>
-                            <View style={{flexDirection: 'row', justifyContent: 'space-between', width: '50%', marginTop: 20}}>
-                                <Button title='OK' type='clear' onPress={
-                                    ()=>this.props.onOK(this.props.editingItem, content, date)}/>
-                                <Button title='Cancel' type='clear' onPress={this.props.onCancel}/>
+                    <KeyboardAvoidingView style={{flex: 1}} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+                        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                            <View style={styles.centeredView}>
+                                <View style={{flex: 1}}></View>
+                                <View style={styles.modalView}>
+                                    <TextInput multiline placeholder="What's up?" onChangeText={text => this.setState({content:text})} value={content} style={styles.input}/>
+                                    <Button type='clear' title={Utils.simpleDateTime(date)} onPress={()=>this.setState({datePickerOpen: true})}/>
+                                    <View style={{flexDirection: 'row', justifyContent: 'space-between', width: '50%', marginTop: 20}}>
+                                        <Button title='OK' type='clear' onPress={
+                                            ()=>this.props.onOK(this.props.editingItem, content, date)}/>
+                                        <Button title='Cancel' type='clear' onPress={this.props.onCancel}/>
+                                    </View>
+                                </View>
                             </View>
-                        </View>
-                    </View>
+                        </TouchableWithoutFeedback>
+                    </KeyboardAvoidingView>
                 </Modal>
                 <DatePicker
                     modal
@@ -78,8 +83,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         elevation: 5,
         width: '100%',
-        position: 'absolute',
-        bottom: 0,
+        alignSelf: 'flex-end',
     },
     centeredView: {
         flex: 1,
