@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react";
-import {SafeAreaView, FlatList, StyleSheet, Text, View, RefreshControl, ActivityIndicator, Animated, Alert} from 'react-native';
+import {SafeAreaView, FlatList, StyleSheet, Text, View, RefreshControl, ActivityIndicator, Animated, Alert, StatusBar} from 'react-native';
 import { SearchBar, Button } from 'react-native-elements';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DatePicker from 'react-native-date-picker';
@@ -304,6 +304,7 @@ export default function App() {
 
   return (
       <SafeAreaView style={styles.container}>
+          <StatusBar barStyle='dark-content' />
           <View style={styles.titleView}>
               <Text style={styles.titleText}>Time Machine</Text>
               <Button style={styles.logoutButton} icon={{name: "logout", size: 24, color: "gray"}} type='clear' onPress={onLogoutPress}/>
