@@ -7,8 +7,9 @@ import Utils from './Utils';
 
 type AddModalProps = {
     visible: boolean,
+    editingItem: any,
     onCancel: () => void,
-    onOK: (date:Date) => void,
+    onOK: (editingItem:any, content:string, date:Date) => void,
 };
 
 class AddModal extends Component<AddModalProps> {
@@ -20,7 +21,17 @@ class AddModal extends Component<AddModalProps> {
 
     componentDidUpdate(prevProps: Readonly<AddModalProps>, prevState: Readonly<{}>, snapshot?: any) {
         if (this.props.visible && prevProps.visible !== this.props.visible) {
-            this.setState({date: new Date()});
+            if (this.props.editingItem) {
+                this.setState({
+                    content: this.props.editingItem.content,
+                    date: new Date(this.props.editingItem.time)
+                });
+            } else {
+                this.setState({
+                    content: '',
+                    date: new Date(),
+                });
+            }
         }
     }
 
@@ -37,10 +48,11 @@ class AddModal extends Component<AddModalProps> {
                     }}>
                     <View style={styles.centeredView}>
                         <View style={styles.modalView}>
-                            <TextInput multiline placeholder="What's up?" onChangeText={text => this.setState({content:text})} style={styles.input}/>
+                            <TextInput multiline placeholder="What's up?" onChangeText={text => this.setState({content:text})} value={content} style={styles.input}/>
                             <Button type='clear' title={Utils.simpleDateTime(date)} onPress={()=>this.setState({datePickerOpen: true})}/>
                             <View style={{flexDirection: 'row', justifyContent: 'space-between', width: '50%', marginTop: 20}}>
-                                <Button title='OK' type='clear' onPress={()=>this.props.onOK(content, date)}/>
+                                <Button title='OK' type='clear' onPress={
+                                    ()=>this.props.onOK(this.props.editingItem, content, date)}/>
                                 <Button title='Cancel' type='clear' onPress={this.props.onCancel}/>
                             </View>
                         </View>

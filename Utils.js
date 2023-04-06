@@ -3,6 +3,7 @@
  */
 var sprintf = require("sprintf-js").sprintf;
 import config from './config';
+import Clipboard from '@react-native-clipboard/clipboard';
 
 class Utils {
     static simpleDateTime(date) {
@@ -30,6 +31,10 @@ class Utils {
             console.log(error);
             return null;
         }
+    }
+
+    static copyToClipboard(text:string) {
+        Clipboard.setString(text);
     }
 }
 
