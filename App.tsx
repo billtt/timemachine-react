@@ -288,7 +288,10 @@ export default function App() {
           </View>
           <View style={styles.dateView}>
               <Button type='clear' icon={{name: 'arrow-back-ios', size: 16, color: 'gray'}} onPress={()=>changeDate(-1)}></Button>
-              <Button type='clear' title={date.toDateString()} onPress={()=>setDatePickerOpen(true)} titleStyle={{fontSize: 16, color: 'gray'}}></Button>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                  <Button type='clear' title={date.toDateString()} onPress={()=>setDatePickerOpen(true)} titleStyle={{fontSize: 16, color: 'gray'}}></Button>
+                  <Button type='clear' icon={{name: 'today', size: 16, color: 'gray'}} onPress={()=>setDate(new Date())}/>
+              </View>
               <Button type='clear' icon={{name: 'arrow-forward-ios', size: 16, color: 'gray'}} onPress={()=>changeDate(1)}></Button>
           </View>
           <FlatList
